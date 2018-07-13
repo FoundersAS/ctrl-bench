@@ -54,7 +54,7 @@ app.post('/clean', (req: BenchRequest, res) => {
 });
 
 // Create new bench from public key
-app.post('create', (req, res) => {
+app.post('/create', (req, res) => {
   if (!(typeof req.body === 'object' && req.body.key)) return res.status(400).send('missing valid public key')
 
   const key = req.body.key
