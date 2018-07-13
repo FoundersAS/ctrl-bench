@@ -2,14 +2,11 @@ import * as express from 'express'
 import * as bodyParser from 'body-parser'
 import { v4 as uuid } from 'node-uuid';
 
-import checkSigned from './check-signed'
+import {checkSigned, BenchRequest} from './check-signed'
 
-const publicKey = process.env.CTRL_PUBLIC_KEY
-const data = {
-  CTRL_PUBLIC_KEY: []
-}
-
-const checkSig = checkSigned(publicKey)
+const defaultPublicKey = process.env.CTRL_PUBLIC_KEY
+const data = {}
+data[defaultPublicKey] = []
 
 const app = express()
 
@@ -31,33 +28,22 @@ app.all('*', (req, res, next) => {
   return res.redirect(`https://${req.hostname}${req.url}`)
 })
 
-const getPublicKey = (req: any) => {
-  return req.headers['x-ctrl-key'].toString();
-}
+app.use('/get', checkSigned)
+app.use('/clean', checkSigned)
 
-app.use('/get', checkSig)
-app.use('/clean', checkSig)
-
-app.get('/get', (req, res) => {
-  const key = getPublicKey(req)
+// Get everything from a bench bench || requires headers x-ctrl-signature and x-ctrl-key
+app.get('/get', (req: BenchRequest, res) => {
+  const key = req.publicKey
+  console.log(key)
 
   if (!(key in data)) return res.status(404).send('bench not found')
 
   res.send(data[key])
 })
 
-app.post('/', (req, res) => {
-  if (typeof req.body === 'object' && req.body.data && req.body.key) {
-    const d = { id: uuid(), received: new Date(), data: req.body.data }
-    data[req.body.key].push(d)
-    return res.send(d)
-  }
-
-  res.status(500).send('no data submitted')
-})
-
-app.post('/clean', (req, res) => {
-  const key = getPublicKey(req)
+// Delete everythin in bench || requires headers x-ctrl-signature and x-ctrl-key
+app.post('/clean', (req: BenchRequest, res) => {
+  const key = req.publicKey
 
   if (!(key in data)) return res.status(404).send('bench not found')
 
@@ -67,6 +53,7 @@ app.post('/clean', (req, res) => {
   return res.send('bench emptied')
 });
 
+// Create new bench from public key
 app.post('create', (req, res) => {
   if (!(typeof req.body === 'object' && req.body.key)) return res.status(400).send('missing valid public key')
 
@@ -75,6 +62,17 @@ app.post('create', (req, res) => {
 
   data[key] = []
   return res.send('bench created')
+})
+
+// Post to a bench must provide public key + data blob
+app.post('/', (req, res) => {
+  if (typeof req.body === 'object' && req.body.data && req.body.key) {
+    const d = { id: uuid(), received: new Date(), data: req.body.data }
+    data[req.body.key].push(d)
+    return res.send(d)
+  }
+
+  res.status(500).send('no data submitted')
 })
 
 module.exports = app
