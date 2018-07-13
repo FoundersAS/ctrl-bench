@@ -3,11 +3,13 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const express = require("express");
 const bodyParser = require("body-parser");
 const node_uuid_1 = require("node-uuid");
+const cors = require('cors');
 const check_signed_1 = require("./check-signed");
 const defaultPublicKey = process.env.CTRL_PUBLIC_KEY;
 const data = {};
 data[defaultPublicKey] = [];
 const app = express();
+app.use(cors());
 // make sure we can still get public ip address from connections
 app.enable('trust proxy');
 app.use(bodyParser.urlencoded({ extended: false }));
