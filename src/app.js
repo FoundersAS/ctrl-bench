@@ -28,7 +28,6 @@ app.use('/clean', check_signed_1.checkSigned);
 // Get everything from a bench bench || requires headers x-ctrl-signature and x-ctrl-key
 app.get('/get', (req, res) => {
     const key = req.publicKey;
-    console.log(key);
     if (!(key in data))
         return res.status(404).send('bench not found');
     res.send(data[key]);
@@ -38,7 +37,6 @@ app.post('/clean', (req, res) => {
     const key = req.publicKey;
     if (!(key in data))
         return res.status(404).send('bench not found');
-    delete data[key];
     data[key] = [];
     return res.send('bench emptied');
 });

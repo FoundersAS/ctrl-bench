@@ -5,8 +5,18 @@ const cors = require('cors')
 
 import {checkSigned, BenchRequest} from './check-signed'
 
+interface DataBucket {
+  [key: string]: BenchFile[];
+}
+
+interface BenchFile {
+  id: string
+  received: Date
+  data: Object
+}
+
 const defaultPublicKey = process.env.CTRL_PUBLIC_KEY
-const data = {}
+const data = {} as DataBucket
 data[defaultPublicKey] = []
 
 const app = express()
@@ -37,7 +47,6 @@ app.use('/clean', checkSigned)
 // Get everything from a bench bench || requires headers x-ctrl-signature and x-ctrl-key
 app.get('/get', (req: BenchRequest, res) => {
   const key = req.publicKey
-  console.log(key)
 
   if (!(key in data)) return res.status(404).send('bench not found')
 
@@ -50,7 +59,6 @@ app.post('/clean', (req: BenchRequest, res) => {
 
   if (!(key in data)) return res.status(404).send('bench not found')
 
-  delete data[key]
   data[key] = []
 
   return res.send('bench emptied')
@@ -70,7 +78,7 @@ app.post('/create', (req, res) => {
 // Post to a bench must provide public key + data blob
 app.post('/', (req, res) => {
   if (typeof req.body === 'object' && req.body.data && req.body.key) {
-    const d = { id: uuid(), received: new Date(), data: req.body.data }
+    const d = { id: uuid(), received: new Date(), data: req.body.data } as BenchFile
     data[req.body.key].push(d)
     return res.send(d)
   }

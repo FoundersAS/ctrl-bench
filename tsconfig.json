@@ -3,7 +3,7 @@
     "module": "commonjs",
     "target": "es2017",
     "sourceMap": false,
-    "noImplicitAny": false,
+    "noImplicitAny": true,
     "allowJs": false,
     "noEmitOnError": true
   },
