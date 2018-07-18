@@ -1,6 +1,6 @@
 import * as express from 'express'
 import * as bodyParser from 'body-parser'
-import { v4 as uuid } from 'node-uuid'
+import { v4 as uuid } from 'uuid'
 const cors = require('cors')
 
 import {checkSigned, BenchRequest} from './check-signed'

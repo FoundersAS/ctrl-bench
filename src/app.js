@@ -2,7 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const express = require("express");
 const bodyParser = require("body-parser");
-const node_uuid_1 = require("node-uuid");
+const uuid_1 = require("uuid");
 const cors = require('cors');
 const check_signed_1 = require("./check-signed");
 const defaultPublicKey = process.env.CTRL_PUBLIC_KEY;
@@ -53,7 +53,7 @@ app.post('/create', (req, res) => {
 // Post to a bench must provide public key + data blob
 app.post('/', (req, res) => {
     if (typeof req.body === 'object' && req.body.data && req.body.key) {
-        const d = { id: node_uuid_1.v4(), received: new Date(), data: req.body.data };
+        const d = { id: uuid_1.v4(), received: new Date(), data: req.body.data };
         data[req.body.key].push(d);
         return res.send(d);
     }
