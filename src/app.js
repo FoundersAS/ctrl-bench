@@ -40,21 +40,14 @@ app.post('/clean', (req, res) => {
     data[key] = [];
     return res.send('bench emptied');
 });
-// Create new bench from public key
-app.post('/create', (req, res) => {
-    if (!(typeof req.body === 'object' && req.body.key))
-        return res.status(400).send('missing valid public key');
-    const key = req.body.key;
-    if (key in data)
-        return res.status(409).send('bench already exists');
-    data[key] = [];
-    return res.send('bench created');
-});
 // Post to a bench must provide public key + data blob
 app.post('/', (req, res) => {
     if (typeof req.body === 'object' && req.body.data && req.body.key) {
+        const key = req.body.key;
+        if (!(key in data))
+            data[key] = [];
         const d = { id: uuid_1.v4(), received: new Date(), data: req.body.data };
-        data[req.body.key].push(d);
+        data[key].push(d);
         return res.send(d);
     }
     res.status(500).send('no data submitted');
