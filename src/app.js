@@ -1,9 +1,9 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-const express = require("express");
 const bodyParser = require("body-parser");
+const cors = require("cors");
+const express = require("express");
 const uuid_1 = require("uuid");
-const cors = require('cors');
 const check_signed_1 = require("./check-signed");
 const defaultPublicKey = process.env.CTRL_PUBLIC_KEY;
 const data = {};
@@ -28,15 +28,17 @@ app.use('/clean', check_signed_1.checkSigned);
 // Get everything from a bench bench || requires headers x-ctrl-signature and x-ctrl-key
 app.get('/get', (req, res) => {
     const key = req.publicKey;
-    if (!(key in data))
+    if (!(key in data)) {
         return res.status(404).send('bench not found');
+    }
     res.send(data[key]);
 });
 // Delete everythin in bench || requires headers x-ctrl-signature and x-ctrl-key
 app.post('/clean', (req, res) => {
     const key = req.publicKey;
-    if (!(key in data))
+    if (!(key in data)) {
         return res.status(404).send('bench not found');
+    }
     data[key] = [];
     return res.send('bench emptied');
 });
@@ -44,8 +46,9 @@ app.post('/clean', (req, res) => {
 app.post('/', (req, res) => {
     if (typeof req.body === 'object' && req.body.data && req.body.key) {
         const key = req.body.key;
-        if (!(key in data))
+        if (!(key in data)) {
             data[key] = [];
+        }
         const d = { id: uuid_1.v4(), received: new Date(), data: req.body.data };
         data[key].push(d);
         return res.send(d);
